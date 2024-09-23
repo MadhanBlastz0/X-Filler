@@ -14,6 +14,7 @@ from info import *
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInvalid
 from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds
 from database.connections_mdb import active_connection
+from aiogram.utils.exceptions import MessageTooLong
 
 @Client.on_message(filters.new_chat_members & filters.group)
 async def save_group(bot, message):
@@ -250,22 +251,33 @@ async def unban_a_user(bot, message):
         await message.reply(f"Successfully unbanned {k.mention}")
     
 @Client.on_message(filters.command('users') & filters.user(ADMINS))
+
+
 async def list_users(bot, message):
-    # https://t.me/GetTGLink/4184
-    raju = await message.reply('Getting List Of Users')
+    # Notify that the process has started
+    raju = await message.reply('Getting List Of Users...')
+    
+    # Fetch all users from the database
     users = await db.get_all_users()
+    
     out = "Users Saved In DB Are:\n\n"
+    
+    # Iterate through each user and format the output
     async for user in users:
-        out += f"<a href=tg://user?id={user['id']}>{user['name']}</a>"
+        out += f"<a href='tg://user?id={user['id']}'>{user['name']}</a> (ID: {user['id']})"
         if user['ban_status']['is_banned']:
-            out += '( Banned User )'
+            out += ' (Banned User)'
         out += '\n'
+    
     try:
+        # Try to edit the message with the list of users
         await raju.edit_text(out)
     except MessageTooLong:
+        # If the message is too long, write the users to a file and send it
         with open('users.txt', 'w+') as outfile:
             outfile.write(out)
-        await message.reply_document('users.txt', caption="List Of Users")
+        await message.reply_document(open('users.txt', 'rb'), caption="List Of Users")
+
 
 @Client.on_message(filters.command('chats') & filters.user(ADMINS))
 async def list_chats(bot, message):
