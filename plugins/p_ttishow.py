@@ -14,7 +14,7 @@ from info import *
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInvalid
 from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save_group_settings, temp, verify_user, check_token, check_verification, get_token, get_shortlink, get_tutorial, get_seconds
 from database.connections_mdb import active_connection
-from aiogram.utils.exceptions import MessageTooLong
+#from aiogram.utils.exceptions import MessageTooLong
 
 @Client.on_message(filters.new_chat_members & filters.group)
 async def save_group(bot, message):
